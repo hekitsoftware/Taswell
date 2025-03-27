@@ -15,7 +15,7 @@ public class PlayerMovement : MonoBehaviour
 
     // Movement variables
     public float _moveVelocity { get; private set; }
-    private bool _isFacingRight;
+    public bool _isFacingRight;
 
     // Collision check variables
     private RaycastHit2D _groundHit;
@@ -38,8 +38,8 @@ public class PlayerMovement : MonoBehaviour
 
     // Dash
     private Vector2 _dashDirection;
-    private bool _isAirDashing;
-    private bool _isDashing;
+    public bool _isAirDashing;
+    public bool _isDashing;
     private bool _isDashFastFalling;
 
     private float _dashOnGroundTimer;
