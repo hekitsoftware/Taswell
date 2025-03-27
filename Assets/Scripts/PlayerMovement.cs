@@ -69,6 +69,7 @@ public class PlayerMovement : MonoBehaviour
     private void Start()
     {
         animator = GetComponent<Animator>();
+        ChangeAnimationState(PLAYER_IDLE);
     }
 
     private void Update()
@@ -281,13 +282,24 @@ public class PlayerMovement : MonoBehaviour
     {
         if ((_isJumping || _isFalling) && _isGrounded && VerticalVelocity <= 0f)
         {
+            // Reset all jumping-related states
             _isJumping = false;
             _isFalling = false;
             _isFastFalling = false;
             _fastFallTime = 0f;
             _isPastApexThreshold = false;
+
+            // Reset jump count after landing
             _numberOfJumpsUsed = 0;
+
+            // Reset vertical velocity to a small negative number (to stick the player to the ground)
             VerticalVelocity = Physics2D.gravity.y;
+
+            // Ensure that landing puts the character in idle state
+            if (_moveVelocity == 0)
+            {
+                ChangeAnimationState(PLAYER_IDLE);
+            }
         }
     }
 
@@ -366,50 +378,59 @@ public class PlayerMovement : MonoBehaviour
     {
         if (_isDashing)
         {
+            // Increment the dash timer
             _dashOffGroundTimer += Time.fixedDeltaTime;
 
+            // Check if dash time has been reached and stop dashing
             if (_dashOffGroundTimer >= MoveStats.DashTime)
             {
+                // Stop the dash
+                _isDashing = false;
+                _isAirDashing = false;
+
+                // Reset dashes if grounded
                 if (_isGrounded)
                 {
                     ResetDashes();
                 }
 
-                _isAirDashing = false;
-                _isDashing = false;
-
+                // If not jumping, start fast fall
                 if (!_isJumping)
                 {
                     _dashFastFallTime = 0f;
                     _dashFallReleaseSpeed = VerticalVelocity;
 
+                    // Begin fast falling if not grounded
                     if (!_isGrounded)
                     {
                         _isDashFastFalling = true;
                     }
                 }
 
-                return;
+                return; // Exit early because dash is over
             }
 
+            // Handle horizontal dash movement
             _moveVelocity = MoveStats.DashSpeed * _dashDirection.x;
 
+            // Handle vertical dash movement
             if (_dashDirection.y != 0f || _isAirDashing)
             {
                 VerticalVelocity = MoveStats.DashSpeed * _dashDirection.y;
             }
         }
-
         else if (_isDashFastFalling)
         {
+            // Handle fast falling if applicable
             if (VerticalVelocity > 0f)
             {
                 if (_dashFastFallTime < MoveStats.DashTimeForUpwardsCancel)
                 {
                     VerticalVelocity = Mathf.Lerp(_dashFallReleaseSpeed, 0f, (_dashFastFallTime / MoveStats.DashTimeForUpwardsCancel));
                 }
-                else if (_dashFastFallTime >= MoveStats.DashTimeForUpwardsCancel)
+                else
                 {
+                    // Apply gravity once the upwards dash cancellation is done
                     VerticalVelocity += MoveStats.Gravity * MoveStats.DashGravityOnReleaseMulti * Time.fixedDeltaTime;
                 }
 
@@ -417,15 +438,19 @@ public class PlayerMovement : MonoBehaviour
             }
             else
             {
+                // Apply gravity for downward movement
                 VerticalVelocity += MoveStats.Gravity * MoveStats.DashGravityOnReleaseMulti * Time.fixedDeltaTime;
             }
         }
     }
 
+
+
     private void ResetDash()
     {
         _isDashFastFalling = false;
-        _dashOnGroundTimer = -0.01f;
+        _dashOnGroundTimer = MoveStats.DashTime;
+        _dashOffGroundTimer = MoveStats.GroundDashTime;
     }
 
     private void ResetDashes()

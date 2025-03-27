@@ -2,7 +2,7 @@
 - Project name: Taswell
 - Unity version: Unity 6000.0.31f1
 - Active game object:
-  - Name: Player-V1
+  - Name: Ghost
   - Tag: Untagged
-  - Layer: Player
+  - Layer: Default
 <!-- UNITY CODE ASSIST INSTRUCTIONS END -->

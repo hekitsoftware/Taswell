@@ -39,10 +39,10 @@ MonoBehaviour:
   DrawRight: 0
   ArcResolution: 20
   VisualizationSteps: 90
-  DashTime: 0.036
-  DashSpeed: 20
-  GroundDashTime: 0.056
-  NumberOfDashes: 1
-  DashDiagonallyBias: 0.027
+  DashTime: 0.122
+  DashSpeed: 40
+  GroundDashTime: 0.225
+  NumberOfDashes: 2
+  DashDiagonallyBias: 0.4
   DashGravityOnReleaseMulti: 1
-  DashTimeForUpwardsCancel: 0.11
+  DashTimeForUpwardsCancel: 0.027
