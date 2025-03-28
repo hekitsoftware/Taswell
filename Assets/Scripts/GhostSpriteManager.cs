@@ -23,9 +23,6 @@ public class GhostSpriteManager : MonoBehaviour
         _currentSprite = _spriteRenderer.sprite;
         _mySpriteRenderer.sprite = _currentSprite;
 
-        if (_playerScript._isDashing || _playerScript._isAirDashing) { _isAnyDashing = true; }
-        else { _isAnyDashing = false; }
-
         // Directly set the rotation of echoObj based on the player's direction
         if (_playerScript._isFacingRight)
         {

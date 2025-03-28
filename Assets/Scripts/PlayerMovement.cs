@@ -36,19 +36,6 @@ public class PlayerMovement : MonoBehaviour
     private float _apexPoint;
     private bool _isPastApexThreshold;
 
-    // Dash
-    private Vector2 _dashDirection;
-    public bool _isAirDashing;
-    public bool _isDashing;
-    private bool _isDashFastFalling;
-
-    private float _dashOnGroundTimer;
-    private float _dashOffGroundTimer;
-    private float _dashFastFallTime;
-    private float _dashFallReleaseSpeed;
-
-    private int _numberOfDashesUsed;
-
     // Jump buffer and coyote time
     private float _jumpBufferTimer;
     private bool _jumpReleasedDuringBuffer;
@@ -74,7 +61,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        DashCheck();
         JumpChecks();
         LandCheck();
         CountTimers();
@@ -84,7 +70,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void FixedUpdate()
     {
-        Dash();
         Jump();
         CollisionChecks();
 
@@ -305,161 +290,6 @@ public class PlayerMovement : MonoBehaviour
 
     #endregion
 
-    #region Dash
-
-    private void DashCheck()
-    {
-        if (InputManager.DashWasPressed)
-        {
-            // Dash when grounded
-            if (_isGrounded && _dashOnGroundTimer <= 0 && !_isDashing)
-            {
-                InitDash();
-            }
-            // Air dash: only if dashes are available and not already dashing
-            else if (!_isGrounded && !_isDashing && _numberOfDashesUsed < MoveStats.NumberOfDashes)
-            {
-                _isAirDashing = true;
-                InitDash();
-            }
-        }
-    }
-
-    private void InitDash()
-    {
-        _dashDirection = InputManager.Movement;
-
-        // Determine closest dash direction based on input
-        Vector2 closestDirection = Vector2.zero;
-        float minDistance = Vector2.Distance(_dashDirection, MoveStats.DashDirections[0]);
-
-        for (int i = 0; i < MoveStats.DashDirections.Length; i++)
-        {
-            if (_dashDirection == MoveStats.DashDirections[i])
-            {
-                closestDirection = _dashDirection;
-                break;
-            }
-
-            float distance = Vector2.Distance(_dashDirection, MoveStats.DashDirections[i]);
-
-            // Handle diagonal bias
-            bool isDiagonal = (Mathf.Abs(MoveStats.DashDirections[i].x) == 1 && Mathf.Abs(MoveStats.DashDirections[i].y) == 1);
-            if (isDiagonal)
-            {
-                distance -= MoveStats.DashDiagonallyBias;
-            }
-
-            if (distance < minDistance)
-            {
-                minDistance = distance;
-                closestDirection = MoveStats.DashDirections[i];
-            }
-        }
-
-        // Default dash direction if no input
-        if (closestDirection == Vector2.zero)
-        {
-            closestDirection = _isFacingRight ? Vector2.right : Vector2.left;
-        }
-
-        _dashDirection = closestDirection;
-        _numberOfDashesUsed++;
-
-        // Start dashing
-        _isDashing = true;
-        _dashOffGroundTimer = 0f;
-        _dashOnGroundTimer = MoveStats.GroundDashTime;
-
-        ResetDash();
-    }
-
-    private void Dash()
-    {
-        if (_isDashing)
-        {
-            // Increment the dash timer
-            _dashOffGroundTimer += Time.fixedDeltaTime;
-
-            // Check if dash time has been reached and stop dashing
-            if (_dashOffGroundTimer >= MoveStats.DashTime)
-            {
-                // Stop the dash
-                _isDashing = false;
-                _isAirDashing = false;
-
-                // Reset dashes if grounded
-                if (_isGrounded)
-                {
-                    ResetDashes();
-                }
-
-                // If not jumping, start fast fall
-                if (!_isJumping)
-                {
-                    _dashFastFallTime = 0f;
-                    _dashFallReleaseSpeed = VerticalVelocity;
-
-                    // Begin fast falling if not grounded
-                    if (!_isGrounded)
-                    {
-                        _isDashFastFalling = true;
-                    }
-                }
-
-                return; // Exit early because dash is over
-            }
-
-            // Handle horizontal dash movement
-            _moveVelocity = MoveStats.DashSpeed * _dashDirection.x;
-
-            // Handle vertical dash movement
-            if (_dashDirection.y != 0f || _isAirDashing)
-            {
-                VerticalVelocity = MoveStats.DashSpeed * _dashDirection.y;
-            }
-        }
-        else if (_isDashFastFalling)
-        {
-            // Handle fast falling if applicable
-            if (VerticalVelocity > 0f)
-            {
-                if (_dashFastFallTime < MoveStats.DashTimeForUpwardsCancel)
-                {
-                    VerticalVelocity = Mathf.Lerp(_dashFallReleaseSpeed, 0f, (_dashFastFallTime / MoveStats.DashTimeForUpwardsCancel));
-                }
-                else
-                {
-                    // Apply gravity once the upwards dash cancellation is done
-                    VerticalVelocity += MoveStats.Gravity * MoveStats.DashGravityOnReleaseMulti * Time.fixedDeltaTime;
-                }
-
-                _dashFastFallTime += Time.fixedDeltaTime;
-            }
-            else
-            {
-                // Apply gravity for downward movement
-                VerticalVelocity += MoveStats.Gravity * MoveStats.DashGravityOnReleaseMulti * Time.fixedDeltaTime;
-            }
-        }
-    }
-
-
-
-    private void ResetDash()
-    {
-        _isDashFastFalling = false;
-        _dashOnGroundTimer = MoveStats.DashTime;
-        _dashOffGroundTimer = MoveStats.GroundDashTime;
-    }
-
-    private void ResetDashes()
-    {
-        _numberOfDashesUsed = 0;
-    }
-
-    #endregion
-
     #region Collision Checks
 
     private void IsGrounded()
@@ -499,16 +329,6 @@ public class PlayerMovement : MonoBehaviour
         if (_coyoteTimer > 0)
         {
             _coyoteTimer -= Time.fixedDeltaTime;
-        }
-
-        if (_dashOnGroundTimer > 0)
-        {
-            _dashOnGroundTimer -= Time.fixedDeltaTime;
-        }
-
-        if (_dashOffGroundTimer > 0)
-        {
-            _dashOffGroundTimer -= Time.fixedDeltaTime;
         }
     }
 
