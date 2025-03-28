@@ -9,6 +9,8 @@ public class GhostSpriteManager : MonoBehaviour
     public GameObject _echoObj;
     public Rigidbody2D _rb;
 
+    public bool _isHazy = false;
+
     private float timeBtwSpawns;
     public float startTimeBtwSpawns;
 
@@ -37,7 +39,13 @@ public class GhostSpriteManager : MonoBehaviour
 
     private void Update()
     {
-        if (_isAnyDashing)
+        if (_isHazy) { Haze(); }
+        else { _mySpriteRenderer.color = new Color(1f, 0.643f, 0f); }
+        //#FFA400
+
+        DebugInputs();
+
+        if (_rb.linearVelocityX != 0 || _rb.linearVelocityY > 0)
         {
             if (timeBtwSpawns <= 0)
             {
@@ -61,5 +69,17 @@ public class GhostSpriteManager : MonoBehaviour
                 timeBtwSpawns -= Time.fixedDeltaTime;
             }
         }
+    }
+
+    private void Haze()
+    {
+        float hue = Mathf.PingPong(Time.time * 0.1f, 1f); // Change the speed of color transition with the multiplier
+        _mySpriteRenderer.color = Color.HSVToRGB(hue, 1f, 1f); // Saturation and Value set to 1 for vibrant colors
+    }
+
+    private void DebugInputs()
+    {
+        if (Input.GetKey(KeyCode.F4)) { _isHazy = true; }
+        if (Input.GetKey(KeyCode.F5)) { _isHazy = false; }
     }
 }
