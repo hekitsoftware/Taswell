@@ -9,6 +9,7 @@ public class GhostSpriteManager : MonoBehaviour
     public GameObject _echoObj;
     public Rigidbody2D _rb;
 
+    public bool _showTrail = false;
     public bool _isHazy = false;
 
     private float timeBtwSpawns;
@@ -42,7 +43,7 @@ public class GhostSpriteManager : MonoBehaviour
 
         DebugInputs();
 
-        if (_rb.linearVelocityX != 0 || _rb.linearVelocityY > 0)
+        if (_showTrail)
         {
             if (timeBtwSpawns <= 0)
             {
