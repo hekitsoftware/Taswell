@@ -2,21 +2,19 @@ using UnityEngine;
 using System.Collections;
 using DG.Tweening;
 
-public class CrossFade : MonoBehaviour
+public class CrossFade : SceneTransitions
 {
     public CanvasGroup crossFade;
 
-    // Removed 'override' here
-    public IEnumerator AnimateTransitionIn()
+    public override IEnumerator AnimateTransitionIn()
     {
-        var tweener = crossFade.DOFade(1f, 1f);
+        var tweener = crossFade.DOFade(1f, 3f);
         yield return tweener.WaitForCompletion();
     }
 
-    // Removed 'override' here
-    public IEnumerator AnimateTransitionOut()
+    public override IEnumerator AnimateTransitionOut()
     {
-        var tweener = crossFade.DOFade(0f, 1f);
+        var tweener = crossFade.DOFade(0f, 3f);
         yield return tweener.WaitForCompletion();
     }
 }

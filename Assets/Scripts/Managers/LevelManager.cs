@@ -29,6 +29,19 @@ public class LevelManager : MonoBehaviour
     private void Start()
     {
         transitions = transContainer.GetComponentsInChildren<SceneTransitions>();
+
+        // Debugging the transitions
+        if (transitions.Length == 0)
+        {
+            Debug.LogError("No SceneTransitions found in the transContainer.");
+        }
+        else
+        {
+            foreach (var t in transitions)
+            {
+                Debug.Log($"Found SceneTransition: {t.name}");
+            }
+        }
     }
 
     public void LoadScene(string sceneName, string transitionName)
@@ -38,7 +51,14 @@ public class LevelManager : MonoBehaviour
 
     private IEnumerator LoadSceneAsync(string sceneName, string transitionName)
     {
-        SceneTransitions transition = transitions.First(t => t.name == transitionName);
+        // Use FirstOrDefault to avoid throwing an exception if no match is found
+        SceneTransitions transition = transitions.FirstOrDefault(t => t.name == transitionName);
+
+        if (transition == null)
+        {
+            Debug.LogError($"No SceneTransition found with the name '{transitionName}'!");
+            yield break; // Exit if no transition is found
+        }
 
         // Use UnityEngine.AsyncOperation explicitly to avoid ambiguity
         UnityEngine.AsyncOperation scene = SceneManager.LoadSceneAsync(sceneName);
@@ -59,5 +79,4 @@ public class LevelManager : MonoBehaviour
 
         yield return transition.AnimateTransitionOut();
     }
-
 }
